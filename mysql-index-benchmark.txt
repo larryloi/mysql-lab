@@ -1,0 +1,19 @@
+TOP 20 members
+operations date range: 2000-01-01 ~ 2010-01-01
+operations days period: 1
+select operations: 4971 times
+us per select: 74825.84850764075
+selects/s: 13.364365656313087
+"SELECT DISTINCT possible_keys, `key`, `Extra`, MIN(`rows`) AS `min_rows`, MAX(`rows`) AS `max_rows`, MIN(`filtered`) AS `min_filtered`, MAX(`filtered`) AS `max_filtered`, AVG(`filtered`) AS `avg_filtered` FROM explain_logs WHERE `table`='b' GROUP BY possible_keys, `key`, `Extra`;"
+[
+    [0] {
+        :possible_keys => "ix_member,ix_created_at",
+                  :key => "ix_created_at",
+                :Extra => "Using index condition",
+             :min_rows => 21370,
+             :max_rows => 33392,
+         :min_filtered => 0.71,
+         :max_filtered => 0.88,
+         :avg_filtered => 0.788578
+    }
+]
