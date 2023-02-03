@@ -1,5 +1,5 @@
 TOP 20 members
- [100/100] [100%] [06:11] [00:00] [  0.27/s]
+[06:11] [00:00] [  0.27/s]
 operations date range: 2000-01-01 ~ 2010-01-01
 operations days period: 1
 select operations: 4971 times
@@ -21,7 +21,7 @@ selects/s: 13.364365656313087
 ]
 
 TOP 20 members
-[100/100] [100%] [01:51:33] [00:00] [  0.01/s]
+[01:51:33] [00:00] [  0.01/s]
 operations date range: 2000-01-01 ~ 2010-01-01
 operations days period: 30
 select operations: 4973 times
@@ -78,7 +78,7 @@ selects/s: 8.451399609982326
 
 
 TOP 20 members
-[100/100] [100%] [06:01] [00:00] [  0.28/s]
+[100%] [06:01] [00:00] [  0.28/s]
 operations date range: 2010-01-01 ~ 2020-01-01
 operations days period: 1
 select operations: 5000 times
@@ -154,3 +154,139 @@ selects/s: 23.186279015919894
 ]
 
 
+----------------------------------------------------------------------------------------------------------------------------------------
+
+All members
+[01:56] [00:00] [  0.86/s]
+operations date range: 2000-01-01 ~ 2010-01-01
+operations days period: 1
+select operations: 5000 times
+us per select: 23315.896120108664
+selects/s: 42.88919434400617
+"SELECT DISTINCT possible_keys, `key`, `Extra`, MIN(`rows`) AS `min_rows`, MAX(`rows`) AS `max_rows`, MIN(`filtered`) AS `min_filtered`, MAX(`filtered`) AS `max_filtered`, AVG(`filtered`) AS `avg_filtered`, COUNT(*) AS `cnt` FROM explain_logs WHERE `table`='b' GROUP BY possible_keys, `key`, `Extra`;"
+[
+    [0] {
+        :possible_keys => "ix_member,ix_created_at",
+                  :key => "ix_member",
+                :Extra => "Using index condition",
+             :min_rows => 72,
+             :max_rows => 25248,
+         :min_filtered => 0.02,
+         :max_filtered => 0.07,
+         :avg_filtered => 0.037054,
+                  :cnt => 5000
+    }
+]
+
+[02:41] [00:00] [  0.62/s]
+operations date range: 2000-01-01 ~ 2010-01-01
+operations days period: 30
+select operations: 5000 times
+us per select: 32273.823399096727
+selects/s: 30.98486310822373
+"SELECT DISTINCT possible_keys, `key`, `Extra`, MIN(`rows`) AS `min_rows`, MAX(`rows`) AS `max_rows`, MIN(`filtered`) AS `min_filtered`, MAX(`filtered`) AS `max_filtered`, AVG(`filtered`) AS `avg_filtered`, COUNT(*) AS `cnt` FROM explain_logs WHERE `table`='b' GROUP BY possible_keys, `key`, `Extra`;"
+[
+    [0] {
+        :possible_keys => "ix_member,ix_created_at",
+                  :key => "ix_member",
+                :Extra => "Using index condition",
+             :min_rows => 71,
+             :max_rows => 25288,
+         :min_filtered => 0.53,
+         :max_filtered => 0.73,
+         :avg_filtered => 0.65032,
+                  :cnt => 5000
+    }
+]
+
+
+[04:15] [00:00] [  0.39/s]
+operations date range: 2000-01-01 ~ 2010-01-01
+operations days period: 90
+select operations: 5000 times
+us per select: 51042.24538728595
+selects/s: 19.591614601051404
+"SELECT DISTINCT possible_keys, `key`, `Extra`, MIN(`rows`) AS `min_rows`, MAX(`rows`) AS `max_rows`, MIN(`filtered`) AS `min_filtered`, MAX(`filtered`) AS `max_filtered`, AVG(`filtered`) AS `avg_filtered`, COUNT(*) AS `cnt` FROM explain_logs WHERE `table`='b' GROUP BY possible_keys, `key`, `Extra`;"
+[
+    [0] {
+        :possible_keys => "ix_member,ix_created_at",
+                  :key => "ix_member",
+                :Extra => "Using index condition",
+             :min_rows => 71,
+             :max_rows => 25288,
+         :min_filtered => 1.31,
+         :max_filtered => 2.31,
+         :avg_filtered => 1.789124,
+                  :cnt => 5000
+    }
+]
+
+
+[01:53] [00:00] [  0.88/s]
+
+operations date range: 2010-01-01 ~ 2020-01-01
+operations days period: 1
+select operations: 5000 times
+us per select: 22755.942223593593
+selects/s: 43.94456578305027
+"SELECT DISTINCT possible_keys, `key`, `Extra`, MIN(`rows`) AS `min_rows`, MAX(`rows`) AS `max_rows`, MIN(`filtered`) AS `min_filtered`, MAX(`filtered`) AS `max_filtered`, AVG(`filtered`) AS `avg_filtered`, COUNT(*) AS `cnt` FROM explain_logs WHERE `table`='b' GROUP BY possible_keys, `key`, `Extra`;"
+[
+    [0] {
+        :possible_keys => "ix_member,ix_created_at",
+                  :key => "ix_member",
+                :Extra => "Using index condition",
+             :min_rows => 71,
+             :max_rows => 25060,
+         :min_filtered => 0.02,
+         :max_filtered => 0.07,
+         :avg_filtered => 0.040192,
+                  :cnt => 5000
+    }
+]
+
+
+
+[02:35] [00:00] [  0.64/s]
+
+operations date range: 2010-01-01 ~ 2020-01-01
+operations days period: 30
+select operations: 5000 times
+us per select: 31014.151641353965
+selects/s: 32.24334528198443
+"SELECT DISTINCT possible_keys, `key`, `Extra`, MIN(`rows`) AS `min_rows`, MAX(`rows`) AS `max_rows`, MIN(`filtered`) AS `min_filtered`, MAX(`filtered`) AS `max_filtered`, AVG(`filtered`) AS `avg_filtered`, COUNT(*) AS `cnt` FROM explain_logs WHERE `table`='b' GROUP BY possible_keys, `key`, `Extra`;"
+[
+    [0] {
+        :possible_keys => "ix_member,ix_created_at",
+                  :key => "ix_member",
+                :Extra => "Using index condition",
+             :min_rows => 71,
+             :max_rows => 25276,
+         :min_filtered => 0.63,
+         :max_filtered => 0.93,
+         :avg_filtered => 0.805382,
+                  :cnt => 5000
+    }
+]
+
+
+ [04:13] [00:00] [  0.39/s]
+
+operations date range: 2010-01-01 ~ 2020-01-01
+operations days period: 90
+select operations: 5000 times
+us per select: 50670.41287124157
+selects/s: 19.73538290562378
+"SELECT DISTINCT possible_keys, `key`, `Extra`, MIN(`rows`) AS `min_rows`, MAX(`rows`) AS `max_rows`, MIN(`filtered`) AS `min_filtered`, MAX(`filtered`) AS `max_filtered`, AVG(`filtered`) AS `avg_filtered`, COUNT(*) AS `cnt` FROM explain_logs WHERE `table`='b' GROUP BY possible_keys, `key`, `Extra`;"
+[
+    [0] {
+        :possible_keys => "ix_member,ix_created_at",
+                  :key => "ix_member",
+                :Extra => "Using index condition",
+             :min_rows => 71,
+             :max_rows => 25276,
+         :min_filtered => 1.75,
+         :max_filtered => 2.64,
+         :avg_filtered => 2.2021,
+                  :cnt => 5000
+    }
+]

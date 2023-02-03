@@ -10,10 +10,11 @@ require 'awesome_print'
 $DB = Sequel.connect("mysql2://admin:Cc123456@dev-cluster-instance-1.cl2cvzlkwjiz.us-west-2.rds.amazonaws.com:3306/dev_books")
 $is_save_explain=true
 $is_show_sql=false
-date_start = Date.parse('2000-01-01')
-date_end = Date.parse('2010-01-01')
+date_start = Date.parse('2010-01-01')
+date_end = Date.parse('2020-01-01')
 query_period_days = 90
-num_of_list=5000
+num_of_ops=5000
+num_of_batch=1000
 
 period_days = query_period_days.to_s
 sql_template = "SELECT SQL_NO_CACHE m.`member_id` ,m.`name` ,m.`country_code` ,m.`status` ,b.game_id ,b.amt ,b.bet_time ,b.created_at FROM member m  JOIN bet b ON b.member_id = m.member_id WHERE b.member_id = member_val AND  b.created_at BETWEEN 'created_at_val' AND TIMESTAMPADD(DAY, #{period_days}, 'created_at_val') LIMIT 20;"
@@ -54,11 +55,11 @@ search_list = []
 nil_cnt = 0
 bar_sl = ProgressBar.new
 
-for a in 1..num_of_list do
+for a in 1..num_of_ops do
     date_a = random_time = rand(date_start..date_end)
     date_b = date_a+1
-    #res = $DB[:bet].select(:member_id, :created_at).where(:created_at => (date_a..date_b)).exclude(member_id: [2430,2943,3102,3676,3699,3822,4363,4388,4515,4545,5967,6365,6420,6873,7332,7910,8200,9046,9330,9428] ).first
-    res = $DB[:bet].select(:member_id, :created_at).where(:created_at => (date_a..date_b)).where(member_id: [2430,2943,3102,3676,3699,3822,4363,4388,4515,4545,5967,6365,6420,6873,7332,7910,8200,9046,9330,9428] ).first
+    res = $DB[:bet].select(:member_id, :created_at).where(:created_at => (date_a..date_b)).exclude(member_id: [2430,2943,3102,3676,3699,3822,4363,4388,4515,4545,5967,6365,6420,6873,7332,7910,8200,9046,9330,9428] ).first
+    #res = $DB[:bet].select(:member_id, :created_at).where(:created_at => (date_a..date_b)).where(member_id: [2430,2943,3102,3676,3699,3822,4363,4388,4515,4545,5967,6365,6420,6873,7332,7910,8200,9046,9330,9428] ).first
     #puts "nil" if res.nil?
     if res.nil? then nil_cnt += 1 end
     search_list << res unless res.nil?
@@ -83,7 +84,11 @@ elapsed_time = Benchmark.realtime do
                 f.puts $DB.fetch(sql_exec).all
                 f.puts "-"*10 + " " + (idx + 1 ).to_s + " " + "-"*10 + "\n"
         }
-        bar_query.increment!
+      if (idx + 1).divmod(num_of_batch)[1] == 0 then
+         puts "#{Time.now.to_s} | Query rows: #{(idx+1).to_s}/#{num_of_ops} "
+         sleep(1)
+      end
+        #bar_query.increment!
     end
 end
 
@@ -94,10 +99,11 @@ puts "\n"
 ops = "select"
 
 puts "operations date range: #{date_start.to_s} ~ #{date_end.to_s}"
-puts "operations date period: #{period_days}"
+puts "operations days period: #{period_days}"
 puts "#{ops} operations: #{search_list.size} times"
 puts "us per #{ops}: #{t}"
-puts "#{ops}s/s: #{n}"
+puts "#{ops}s/s: #{n} "
+puts "\n"
 
 sql_explain_result="SELECT DISTINCT possible_keys, `key`, `Extra`, MIN(`rows`) AS `min_rows`, MAX(`rows`) AS `max_rows`, MIN(`filtered`) AS `min_filtered`, MAX(`filtered`) AS `max_filtered`, AVG(`filtered`) AS `avg_filtered`, COUNT(*) AS `cnt` FROM explain_logs WHERE `table`='b' GROUP BY possible_keys, `key`, `Extra`;"
 ap $DB.fetch(sql_explain_result)
