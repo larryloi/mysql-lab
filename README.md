@@ -1,2 +1,2 @@
-# lab_mysql
+# mysql_lab
 MySQL study lab repo
