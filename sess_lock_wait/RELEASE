@@ -1,0 +1,2 @@
+IMAGE=mysql-lock-mon
+TAG=1.0.0

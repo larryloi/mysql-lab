@@ -7,7 +7,7 @@ require 'ulid'
 require 'progress_bar'
 require 'awesome_print'
 
-$DB = Sequel.connect("mysql2://admin:Cc123456@dev-cluster-instance-1.cl2cvzlkwjiz.us-west-2.rds.amazonaws.com:3306/dev_books")
+$DB = Sequel.connect("mysql2://admin:Cc123456@dev-cluster-instance-1.xxxx.com:3306/dev_books")
 $is_save_explain=true
 $is_show_sql=false
 date_start = Date.parse('2010-01-01')

@@ -6,7 +6,7 @@ require 'date'
 require 'ulid'
 require 'progress_bar'
 
-$DB = Sequel.connect("mysql2://admin:Cc123456@dev-cluster-instance-1.cl2cvzlkwjiz.us-west-2.rds.amazonaws.com:3306/dev_books")
+$DB = Sequel.connect("mysql2://admin:Cc123456@dev-cluster-instance-1.xxx.com:3306/dev_books")
 $is_save_explain=true
 $is_show_sql=false
 date_start = Time.parse('2019-01-01')

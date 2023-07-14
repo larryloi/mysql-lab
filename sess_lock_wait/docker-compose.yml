@@ -1,0 +1,16 @@
+version: '3'
+services:
+  app:
+    image: "${IMAGE}:${TAG}"
+    #build: .
+    env_file:
+      - .env
+    stdin_open: true
+    tty: true
+    networks:
+      - platform_integration
+
+
+networks:
+  platform_integration:
+    external: true
