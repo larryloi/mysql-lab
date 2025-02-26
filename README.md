@@ -3,6 +3,7 @@ MySQL study lab repo
 
 # Docker deployment
 ## Standalone, Replication deployment
+```
 deploy/
 ├── replication
 │   ├── repl-primary-8.0
@@ -32,4 +33,4 @@ deploy/
     │           └── src
     │               └── 01-databases.sql
     └── docker-compose.yml
-
+```
