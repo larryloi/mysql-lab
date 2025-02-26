@@ -1,0 +1,15 @@
+services:
+  mysql_primary:
+    image: mysql:8.4
+    container_name: mysql_primary
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./primary.cnf:/etc/mysql/conf.d/replication.cnf
+    ports:
+      - "3306:3306"
+    restart: unless-stopped
+
+volumes:
+  mysql_data:

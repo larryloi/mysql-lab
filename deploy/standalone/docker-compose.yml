@@ -1,0 +1,29 @@
+#version: "3"
+
+services:
+  mysql:
+    image: mysql/mysql-server:8.0.32-1.2.11-server
+    env_file:
+      - .env
+    container_name: "${MYSQL_HOST}"
+    dns:
+      - 192.168.50.199
+    environment:
+      TZ: Asia/Shanghai
+      MYSQL_ROOT_PASSWORD: Abcd1234
+      MYSQL_DATABASE: "${MYSQL_DATABASE}"
+    ports:
+      - 3306:3306
+    volumes:
+      - ./db/mysql/db.conf.8.x/my.cnf:/etc/my.cnf
+      - ./db/mysql/db.init.8.x/dst:/docker-entrypoint-initdb.d
+      - vol-mysql:/var/lib/mysql
+    networks:
+      - integration
+
+volumes:
+  vol-mysql:
+
+networks:
+  integration:
+    driver: bridge
