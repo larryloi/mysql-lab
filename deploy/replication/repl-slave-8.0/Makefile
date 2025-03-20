@@ -6,3 +6,15 @@ down:
 
 shell:
 	docker compose -f docker-compose.replica.yml exec -it mysql_replica mysql -hlocalhost -uroot -prootpass
+
+ps:
+	docker compose -f docker-compose.replica.yml ps
+
+logs:
+	docker compose -f docker-compose.replica.yml logs -f
+
+volume.rm.all:
+	docker volume rm $$(docker volume ls -qf dangling=true)
+
+volume.ls:
+	docker volume ls

@@ -3,7 +3,8 @@ services:
     image: mysql:8.4
     container_name: mysql_replica
     environment:
-      MYSQL_ROOT_PASSWORD: rootpass
+      - TZ=Asia/Shanghai
+      - MYSQL_ROOT_PASSWORD=rootpass
     volumes:
       - mysql_data:/var/lib/mysql
       - ./replica.cnf:/etc/mysql/conf.d/replication.cnf
