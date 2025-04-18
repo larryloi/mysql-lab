@@ -1,29 +1,15 @@
-#version: "3"
-
 services:
   mysql:
-    image: mysql/mysql-server:8.0.32-1.2.11-server
-    env_file:
-      - .env
-    container_name: "${MYSQL_HOST}"
-    dns:
-      - 192.168.50.199
+    image: mysql:8.0.33
+    container_name: mysql
     environment:
-      TZ: Asia/Shanghai
-      MYSQL_ROOT_PASSWORD: Abcd1234
-      MYSQL_DATABASE: "${MYSQL_DATABASE}"
-    ports:
-      - 3306:3306
+      MYSQL_ROOT_PASSWORD: rootpass
     volumes:
-      - ./db/mysql/db.conf.8.x/my.cnf:/etc/my.cnf
-      - ./db/mysql/db.init.8.x/dst:/docker-entrypoint-initdb.d
-      - vol-mysql:/var/lib/mysql
-    networks:
-      - integration
+      - mysql_data:/var/lib/mysql
+      - ./primary.cnf:/etc/mysql/conf.d/replication.cnf
+    ports:
+      - "3306:3306"
+    restart: unless-stopped
 
 volumes:
-  vol-mysql:
-
-networks:
-  integration:
-    driver: bridge
+  mysql_data:

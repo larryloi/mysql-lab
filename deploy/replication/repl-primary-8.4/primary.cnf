@@ -2,3 +2,4 @@
 server-id = 1
 log-bin = mysql-bin
 binlog_format = ROW
+max_connections = 1000
