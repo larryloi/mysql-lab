@@ -1,3 +1,5 @@
+include Makefile.env
+
 up:
 	docker compose up -d
 
@@ -6,32 +8,14 @@ down:
 
 
 mysql:
-	docker compose exec mysql mysql -uroot -prootpass -hlocalhost
+	docker compose exec ${CT_NAME} mysql -uroot -prootpass -hlocalhost
 
 mysqlsh:
-	docker compose exec mysql mysqlsh -uroot -prootpass -hlocalhost
+	docker compose exec ${CT_NAME} mysqlsh -uroot -prootpass -hlocalhost
 
 shell:
-	docker compose exec mysql bash
+	docker compose exec ${CT_NAME} bash
 
-######
-primary.mysql:
-	docker compose exec mysql_primary mysql -uroot -prootpass -hlocalhost
-
-primary.mysqlsh:
-	docker compose exec mysql_primary mysqlsh -uroot -prootpass -hlocalhost
-
-primary.shell:
-	docker compose exec mysql_primary bash
-
-replica.mysql:
-	docker compose exec mysql_replica mysql -uroot -prootpass -hlocalhost
-
-replica.mysqlsh:
-	docker compose exec mysql_replica mysqlsh -uroot -prootpass -hlocalhost
-
-replica.shell:
-	docker compose exec mysql_replica bash
 
 ps:
 	docker compose ps
