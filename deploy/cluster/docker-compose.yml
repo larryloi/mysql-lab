@@ -1,0 +1,53 @@
+services:
+  mysql-a:
+      container_name: mysql-a
+      hostname: mysql-a
+      image: mysql:8.4
+      # build: .
+      # command: --default-authentication-plugin=mysql_native_password
+      environment:
+        MYSQL_ROOT_PASSWORD: Abcd1234
+      ports:
+        - "3306:3306"
+      volumes:
+        - ./setup.sql:/docker-entrypoint-initdb.d/setup.sql
+        - ./conf/my.cnf.a:/etc/mysql/my.cnf
+        - ./data-mysql-a:/var/lib/mysql
+  
+  mysql-b:
+      container_name: mysql-b
+      hostname: mysql-b
+      image: mysql:8.4
+      # build: .
+      # command: --default-authentication-plugin=mysql_native_password
+      environment:
+        MYSQL_ROOT_PASSWORD: Abcd1234
+      ports:
+        - "3307:3306"
+      volumes:
+        - ./setup.sql:/docker-entrypoint-initdb.d/setup.sql
+        - ./conf/my.cnf.b:/etc/mysql/my.cnf
+        - ./data-mysql-b:/var/lib/mysql
+  
+  mysql-c:
+      container_name: mysql-c
+      hostname: mysql-c
+      image: mysql:8.4
+      # build: .
+      # command: --default-authentication-plugin=mysql_native_password
+      environment:
+        MYSQL_ROOT_PASSWORD: Abcd1234
+      ports:
+        - "3308:3306"
+      volumes:
+        - ./setup.sql:/docker-entrypoint-initdb.d/setup.sql
+        - ./conf/my.cnf.c:/etc/mysql/my.cnf
+        - ./data-mysql-c:/var/lib/mysql
+
+volumes:
+  data-mysql-a:
+    driver: local
+  data-mysql-b:
+    driver: local
+  data-mysql-c:
+    driver: local
