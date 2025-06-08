@@ -8,12 +8,18 @@
 graph TD;
     
     IngestDB[(Ingestion DB)]
-    LB([Load Balancer])
+    LB([Load Balancer
+    6446])
     Kafka@{ shape: docs, label: "Kafka Topics" }
     Faker([Fake data generator])
-    Router0([MySQL Router0])
-    Router1([MySQL Router1])
-    MySQL-cluster[(MySQL-cluster)]
+    Router0([MySQL Router 0
+    6446, 6447
+    6448, 6449])
+    Router1([MySQL Router 1
+    6446, 6447
+    6448, 6449])
+    MySQL-cluster[(MySQL-cluster
+    3306)]
 
     IngestDB<--Jdbc Sink Connector-->Kafka<--Debezium Source connector-->LB;
     Faker-->LB;
@@ -26,7 +32,6 @@ graph TD;
 
 Starting MySQL router container
 ```shell
-
 docker run \
         -e MYSQL_HOST=10.1.1.105 \
         -e MYSQL_PORT=3306 \
