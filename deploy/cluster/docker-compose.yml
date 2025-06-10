@@ -10,9 +10,11 @@ services:
       ports:
         - "3306:3306"
       volumes:
-        - ./setup.sql:/docker-entrypoint-initdb.d/setup.sql
+        - ./initdb.d/setup.sql:/docker-entrypoint-initdb.d/setup.sql
         - ./conf/my.cnf.a:/etc/mysql/my.cnf
         - ./data-mysql-a:/var/lib/mysql
+      networks:
+        - mysql-cluster
   
   mysql-b:
       container_name: mysql-b
@@ -25,9 +27,11 @@ services:
       ports:
         - "3307:3306"
       volumes:
-        - ./setup.sql:/docker-entrypoint-initdb.d/setup.sql
+        - ./initdb.d/setup.sql:/docker-entrypoint-initdb.d/setup.sql
         - ./conf/my.cnf.b:/etc/mysql/my.cnf
         - ./data-mysql-b:/var/lib/mysql
+      networks:
+        - mysql-cluster
   
   mysql-c:
       container_name: mysql-c
@@ -40,9 +44,39 @@ services:
       ports:
         - "3308:3306"
       volumes:
-        - ./setup.sql:/docker-entrypoint-initdb.d/setup.sql
+        - ./initdb.d/setup.sql:/docker-entrypoint-initdb.d/setup.sql
         - ./conf/my.cnf.c:/etc/mysql/my.cnf
         - ./data-mysql-c:/var/lib/mysql
+      networks:
+        - mysql-cluster
+
+#   router0:
+#       container_name: router0
+#       hostname: router0
+#       image: ${MYSQL_ROUTER_IMAGE}
+#       environment:
+#         MYSQL_HOST: ${MYSQL_HOST}
+#         MYSQL_PORT: $(MYSQL_PORT)
+#         MYSQL_USER: ${MYSQL_USER}
+#         MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+#         MYSQL_INNODB_CLUSTER_MEMBERS: ${MYSQL_INNODB_CLUSTER_MEMBERS}
+#       ports:
+#         - "6446:6446"
+#         - "6447:6447"
+#         - "6448:6448"
+#         - "6449:6449"
+#         - "6450:6450"
+#       depends_on:
+#         - mysql-a
+#         - mysql-b
+#         - mysql-c
+#       networks:
+#         - mysql-cluster
+
+
+networks:
+  mysql-cluster:
+    driver: bridge
 
 volumes:
   data-mysql-a:
