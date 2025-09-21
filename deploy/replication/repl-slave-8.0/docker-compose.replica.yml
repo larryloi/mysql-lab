@@ -1,5 +1,5 @@
 services:
-  mysql_replica:
+  replica:
     image: mysql:8.0.33
     container_name: mysql_replica
     environment:

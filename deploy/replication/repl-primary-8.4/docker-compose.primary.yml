@@ -1,5 +1,5 @@
 services:
-  mysql_primary:
+  primary:
     image: mysql:8.4
     container_name: mysql_primary
     environment:

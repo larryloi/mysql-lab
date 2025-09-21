@@ -6,6 +6,7 @@ services:
       # build: .
       # command: --default-authentication-plugin=mysql_native_password
       environment:
+        TZ: Asia/Shanghai
         MYSQL_ROOT_PASSWORD: Abcd1234
       ports:
         - "3306:3306"
@@ -23,6 +24,7 @@ services:
       # build: .
       # command: --default-authentication-plugin=mysql_native_password
       environment:
+        TZ: Asia/Shanghai
         MYSQL_ROOT_PASSWORD: Abcd1234
       ports:
         - "3307:3306"
@@ -40,6 +42,7 @@ services:
       # build: .
       # command: --default-authentication-plugin=mysql_native_password
       environment:
+        TZ: Asia/Shanghai
         MYSQL_ROOT_PASSWORD: Abcd1234
       ports:
         - "3308:3306"
