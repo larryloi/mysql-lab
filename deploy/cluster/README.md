@@ -10,85 +10,178 @@ https://github.com/DiptoChakrabarty/mysql-docker-cluster
 ### Environment setup
 
 ```mermaid
-graph TD;
+flowchart BT;
     
-    IngestDB[(Ingestion DB)]
+    IngestDB1[(Ingestion DB1)]
+    Paimon[(Paimon)]
     LB([Load Balancer
-    6446])
+    Port 6446])
     Kafka@{ shape: docs, label: "Kafka Topics" }
-    Faker([Fake data generator])
+    APP([Business Application])
     Router0([MySQL Router 0
-    6446, 6447
+    Port 6446, 6447
     6448, 6449])
-    Router1([MySQL Router 1
-    6446, 6447
+    Router1([MySQL Router 1 
+    Port 6446, 6447
     6448, 6449])
     MySQL-cluster[(MySQL-cluster
-    3306)]
+    Port 3306)]
+    ST([WhaleTunnel
+    Seatunnel])
 
-    IngestDB<--Jdbc Sink Connector-->Kafka<--Debezium Source connector-->LB;
-    Faker-->LB;
-    LB-->Router0;
-    LB-->Router1;
-    Router0-->MySQL-cluster;
-    Router1-->MySQL-cluster;
+    Router0 --> MySQL-cluster;
+    Router1 --> MySQL-cluster;
+    LB --> Router0;
+    LB --> Router1;
+    APP --> LB;
+    IngestDB1 <-- Jdbc Sink Connector --> Kafka <-- MySQL Debezium 
+     Source connector --> LB;
+    Paimon <-- Jdbc Sink Connector --> ST <-- MySQL-CDC connector --> LB;
+
+    
 ```
 </br></br>
 
 
 ## Starting up the MySQL cluster
 
-### Start up MySQL Cluster Nodes
+### Start up MySQL Cluster Nodes docker containers
 
 ```shell
 make up ct=mysql-a
-
 make up ct=mysql-b
-
 make up ct=mysql-c
+or
+docker compose up -d
+```
+```initdb.d/setup.sql``` created clusteradmin
+
+### Configure each container
+- Login the first node with ```mysqlsh```
+```sql
+docker compose exec mysql-a mysqlsh -uclusteradmin -pcladmin -hlocalhost
+
+Switching to JavaScript mode...
+ MySQL  localhost  JS > 
 ```
 
-### Configure MySQL Cluster
-Login the first node with ```mysqlsh```
+- Check each node if it is suitable for acting as a cluster node
 ```js
 dba.checkInstanceConfiguration("clusteradmin:cladmin@mysql-a:3306")
+```
 
-// Run for each instance
+- Configure each node , this too for all three nodes
+```js
 dba.configureInstance("clusteradmin:cladmin@mysql-a:3306")
 dba.configureInstance("clusteradmin:cladmin@mysql-b:3306")
 dba.configureInstance("clusteradmin:cladmin@mysql-c:3306")
-
+```
+### Setting up the cluster
+```
 var cluster = dba.createCluster("Cluster_Lab")
 
 cluster.status()
-
-// In the first cluster node, add new node to instance
-// each cluster node will need to restart once.
+```
+- In the first cluster node, add new member instance to cluster
+-  each cluster node will need to restart once.
+```
 cluster.addInstance("clusteradmin:cladmin@mysql-b:3306")
+
 cluster.addInstance("clusteradmin:cladmin@mysql-c:3306")
+```
 
-
-
-
+-  After database cloned to new cluster member, then requires to restarted new member manually
+-  Repeat add instance steps for all slave member nodes
+```js
 Please select a recovery method [C]lone/[I]ncremental recovery/[A]bort (default Clone): C
 Validating instance configuration at mysql-b:3306...
 
+Instance configuration is suitable.
+NOTE: Group Replication will communicate with other members using 'mysql-b:3306'. Use the localAddress option to override.
 
-// Show cluster status
+* Checking connectivity and SSL configuration...
+
+A new instance will be added to the InnoDB Cluster. Depending on the amount of
+data on the cluster this might take from a few seconds to several hours.
+
+Adding instance to the cluster...
+
+Monitoring recovery process of the new cluster member. Press ^C to stop monitoring and let it continue in background.
+Clone based state recovery is now in progress.
+
+NOTE: A server restart is expected to happen as part of the clone process. If the
+server does not support the RESTART command or does not come back after a
+while, you may need to manually start it back.
+
+* Waiting for clone to finish...
+NOTE: mysql-b:3306 is being cloned from mysql-a:3306
+** Stage DROP DATA: Completed
+** Clone Transfer
+    FILE COPY  ############################################################  100%  Completed
+    PAGE COPY  ############################################################  100%  Completed
+    REDO COPY  ############################################################  100%  Completed
+
+NOTE: mysql-b:3306 is shutting down...
+
+* Waiting for server restart... ready
+* mysql-b:3306 has restarted, waiting for clone to finish...
+** Stage RESTART: Completed
+* Clone process has finished: 79.97 MB transferred in about 1 second (~79.97 MB/s)
+
+State recovery already finished for 'mysql-b:3306'
+
+The instance 'mysql-b:3306' was successfully added to the cluster.
+```
+
+
+###  Show cluster status while login
+```
 var cluster=dba.getCluster()
 
 cluster.status()
-
-
-// if cluster var is not set
-var cluster = dba.getCluster()
-
-cluster.rescan()
-
-// Reform cluster after restart
-cluster = dba.rebootClusterFromCompleteOutage()
 ```
+### Restoring the Cluster from complete outage...
+- if cluster var is not set
+- Reform cluster after restart
+```
+var cluster = dba.rebootClusterFromCompleteOutage();
 
+cluster.status()
+
+```
+- Cluster restore log
+```
+MySQL  mysql-a:3306 ssl  JS > var cluster = dba.rebootClusterFromCompleteOutage();
+Restoring the Cluster 'Cluster_Lab' from complete outage...
+
+Cluster instances: 'mysql-a:3306' (OFFLINE), 'mysql-b:3306' (OFFLINE), 'mysql-c:3306' (OFFLINE)
+Waiting for instances to apply pending received transactions...
+Validating instance configuration at mysql-a...
+
+This instance reports its own address as mysql-a:3306
+
+Instance configuration is suitable.
+NOTE: User 'mysql_innodb_cluster_1'@'%' already existed at instance 'mysql-a:3306'. It will be deleted and created again with a new password.
+* Waiting for seed instance to become ONLINE...
+mysql-a:3306 was restored.
+Updating instance metadata...
+The instance metadata for 'mysql-a:3306' was successfully updated.
+...
+...
+
+Instance configuration is suitable.
+Rejoining instance 'mysql-c:3306' to cluster 'Cluster_Lab'...
+
+Re-creating recovery account...
+NOTE: User 'mysql_innodb_cluster_3'@'%' already existed at instance 'mysql-a:3306'. It will be deleted and created again with a new password.
+Monitoring recovery process of the new cluster member. Press ^C to stop monitoring and let it continue in background.
+State recovery already finished for 'mysql-c:3306'
+
+The instance 'mysql-c:3306' was successfully rejoined to the cluster.
+
+The Cluster was successfully rebooted.
+
+```
 
 ### Starting MySQL router container
 ```shell

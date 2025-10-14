@@ -10,6 +10,7 @@ services:
         MYSQL_ROOT_PASSWORD: Abcd1234
       ports:
         - "3306:3306"
+        # - "33061:33061"
       volumes:
         - ./initdb.d/setup.sql:/docker-entrypoint-initdb.d/setup.sql
         - ./conf/my.cnf.a:/etc/mysql/my.cnf
@@ -28,6 +29,7 @@ services:
         MYSQL_ROOT_PASSWORD: Abcd1234
       ports:
         - "3307:3306"
+        # - "33062:33062"
       volumes:
         - ./initdb.d/setup.sql:/docker-entrypoint-initdb.d/setup.sql
         - ./conf/my.cnf.b:/etc/mysql/my.cnf
@@ -46,6 +48,7 @@ services:
         MYSQL_ROOT_PASSWORD: Abcd1234
       ports:
         - "3308:3306"
+        # - "33063:33063"
       volumes:
         - ./initdb.d/setup.sql:/docker-entrypoint-initdb.d/setup.sql
         - ./conf/my.cnf.c:/etc/mysql/my.cnf

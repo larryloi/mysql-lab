@@ -24,6 +24,9 @@ up:
 #	fi
 #	docker compose down
 
+down:
+	docker compose down $(CONTAINER_ARG)
+
 stop:
 	docker compose stop $(CONTAINER_ARG)
 
