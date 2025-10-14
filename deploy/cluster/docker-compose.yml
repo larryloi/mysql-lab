@@ -3,82 +3,99 @@ services:
       container_name: mysql-a
       hostname: mysql-a
       image: mysql:8.4
-      # build: .
-      # command: --default-authentication-plugin=mysql_native_password
-      environment:
-        TZ: Asia/Shanghai
-        MYSQL_ROOT_PASSWORD: Abcd1234
+      env_file:
+        - ./docker-compose.env
       ports:
         - "3306:3306"
-        # - "33061:33061"
       volumes:
         - ./initdb.d/setup.sql:/docker-entrypoint-initdb.d/setup.sql
         - ./conf/my.cnf.a:/etc/mysql/my.cnf
         - ./data-mysql-a:/var/lib/mysql
       networks:
         - mysql-cluster
-  
+      healthcheck:
+        test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+        interval: 10s
+        timeout: 5s
+        retries: 3
+      deploy:
+        resources:
+          limits:
+            cpus: "0.5"
+            memory: "512M"
+
   mysql-b:
       container_name: mysql-b
       hostname: mysql-b
       image: mysql:8.4
-      # build: .
-      # command: --default-authentication-plugin=mysql_native_password
-      environment:
-        TZ: Asia/Shanghai
-        MYSQL_ROOT_PASSWORD: Abcd1234
+      env_file:
+        - ./docker-compose.env
       ports:
         - "3307:3306"
-        # - "33062:33062"
       volumes:
         - ./initdb.d/setup.sql:/docker-entrypoint-initdb.d/setup.sql
         - ./conf/my.cnf.b:/etc/mysql/my.cnf
         - ./data-mysql-b:/var/lib/mysql
       networks:
         - mysql-cluster
-  
+      healthcheck:
+        test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+        interval: 10s
+        timeout: 5s
+        retries: 3
+      deploy:
+        resources:
+          limits:
+            cpus: "0.5"
+            memory: "512M"
+
   mysql-c:
       container_name: mysql-c
       hostname: mysql-c
       image: mysql:8.4
-      # build: .
-      # command: --default-authentication-plugin=mysql_native_password
-      environment:
-        TZ: Asia/Shanghai
-        MYSQL_ROOT_PASSWORD: Abcd1234
+      env_file:
+        - ./docker-compose.env
       ports:
         - "3308:3306"
-        # - "33063:33063"
       volumes:
         - ./initdb.d/setup.sql:/docker-entrypoint-initdb.d/setup.sql
         - ./conf/my.cnf.c:/etc/mysql/my.cnf
         - ./data-mysql-c:/var/lib/mysql
       networks:
         - mysql-cluster
+      healthcheck:
+        test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+        interval: 10s
+        timeout: 5s
+        retries: 3
+      deploy:
+        resources:
+          limits:
+            cpus: "0.5"
+            memory: "512M"
 
-#   router0:
-#       container_name: router0
-#       hostname: router0
-#       image: ${MYSQL_ROUTER_IMAGE}
-#       environment:
-#         MYSQL_HOST: ${MYSQL_HOST}
-#         MYSQL_PORT: $(MYSQL_PORT)
-#         MYSQL_USER: ${MYSQL_USER}
-#         MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-#         MYSQL_INNODB_CLUSTER_MEMBERS: ${MYSQL_INNODB_CLUSTER_MEMBERS}
-#       ports:
-#         - "6446:6446"
-#         - "6447:6447"
-#         - "6448:6448"
-#         - "6449:6449"
-#         - "6450:6450"
-#       depends_on:
-#         - mysql-a
-#         - mysql-b
-#         - mysql-c
-#       networks:
-#         - mysql-cluster
-
+  router0:
+      container_name: router0
+      hostname: router0
+      image: mysql/mysql-router:8.0
+      environment:
+        MYSQL_HOST: mysql-a
+        MYSQL_PORT: 3306
+        MYSQL_USER: root
+        MYSQL_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+        MYSQL_INNODB_CLUSTER_MEMBERS: mysql-a,mysql-b,mysql-c
+      ports:
+        - "6446:6446"
+        - "6447:6447"
+      depends_on:
+        mysql-a:
+          condition: service_healthy
+        mysql-b:
+          condition: service_healthy
+        mysql-c:
+          condition: service_healthy
+      networks:
+        - mysql-cluster
 
 networks:
   mysql-cluster:

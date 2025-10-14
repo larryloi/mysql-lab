@@ -1,13 +1,41 @@
+# MySQL InnoDB Cluster Lab
 
-https://diptochakrabarty.medium.com/setting-mysql-cluster-using-docker-f0e405d03762
+<!-- Architecture summary -->
+This lab demonstrates a MySQL InnoDB Cluster setup using Docker Compose, with integrated MySQL Router and support for CDC/data ingestion via Kafka, Debezium, and Paimon.  
+See [mermaid diagrams](#environment-setup) below for data flows and service boundaries.
 
-https://github.com/DiptoChakrabarty/mysql-docker-cluster
+## Quickstart
 
+```bash
+cd docker/mysql-lab/deploy/cluster
+# Start all cluster containers
+make up                
+# Start MySQL Router 0
+make router0.run       
+# Start MySQL Router 1
+make router1.run       
+# Shell into mysql-a container
+make shell ct=mysql-a  
+```
+- Use `ct=<container>` to target specific containers for commands (see Makefile).
+- For more commands, run `make help`.
 
+## Environment Configuration
+- Secrets and configuration are managed via `docker-compose.env` and `Makefile.env`.
+- Do not commit sensitive files; see `.gitignore` for ignored patterns.
 
-## Bootstraping MySQL Router
+## Troubleshooting
+- If you encounter port conflicts, change the host port in `docker-compose.yml`.
+- Ensure Docker is running before executing any commands.
+- For volume issues, use `make volume.rm.all` to clean up dangling volumes.
 
-### Environment setup
+## Key Files
+
+- `Makefile`, `Makefile.env`: workflow automation and environment management.
+- `docker-compose.yaml`: service orchestration.
+- `resource/`, `conf/`, `initdb.d/`: configuration and initialization scripts.
+
+## Environment setup
 
 ```mermaid
 flowchart BT;
@@ -275,3 +303,14 @@ InnoDB Cluster 'Cluster_Lab' can be reached by connecting to:
 2025-06-05 02:26:08 metadata_cache INFO [7af3a0764640] Connected with metadata server running on mysql-b:3306
 
 ```
+
+## Troubleshooting
+
+- If cluster nodes do not join, check container logs (`make logs ct=mysql-a`).
+- For Router bootstrap issues, ensure the cluster is healthy and reachable.
+- Restart containers if clone/recovery hangs.
+
+## References
+
+- https://diptochakrabarty.medium.com/setting-mysql-cluster-using-docker-f0e405d03762
+- https://github.com/DiptoChakrabarty/mysql-docker-cluster
