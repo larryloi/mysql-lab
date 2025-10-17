@@ -9,11 +9,11 @@ See [mermaid diagrams](#environment-setup) below for data flows and service boun
 ```bash
 cd docker/mysql-lab/deploy/cluster
 # Start all cluster containers
-make up                
+make up.all
 # Start MySQL Router 0
-make router0.run       
+make router0.run
 # Start MySQL Router 1
-make router1.run       
+make router1.run
 # Shell into mysql-a container
 make shell ct=mysql-a  
 ```
