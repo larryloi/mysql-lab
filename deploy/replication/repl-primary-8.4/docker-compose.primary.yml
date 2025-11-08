@@ -12,5 +12,16 @@ services:
       - "3306:3306"
     restart: unless-stopped
 
+  mysqld_exporter:
+    image: prom/mysqld-exporter:latest
+    container_name: mysqld_exporter
+    command:
+      - "--mysqld.username=exporter:Abcd1234"
+      - "--mysqld.address=mysql:3306"
+    ports:
+      - "9104:9104"
+    depends_on:
+      - primary
+
 volumes:
   mysql_data:
