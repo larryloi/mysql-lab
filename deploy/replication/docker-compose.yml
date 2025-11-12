@@ -1,0 +1,54 @@
+services:
+  primary:
+    image: ${DOCKER_IMAGE}
+    container_name: primary
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_HOST=${MYSQL_HOST}
+      - MYSQL_PORT=3306
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - TZ=${TZ}
+    volumes:
+      - primary_mysql_data:/var/lib/mysql
+      - ./conf/primary.cnf:/etc/mysql/conf.d/replication.cnf
+      - ../sql/:/sql/
+    ports:
+      - "3306:3306"
+    restart: unless-stopped
+
+  replica:
+    image: ${DOCKER_IMAGE}
+    container_name: replica
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_HOST=${MYSQL_HOST}
+      - MYSQL_PORT=3307
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - TZ=${TZ}
+    volumes:
+      - replica_mysql_data:/var/lib/mysql
+      - ./conf/replica.cnf:/etc/mysql/conf.d/replication.cnf
+    ports:
+      - "3307:3306"
+    restart: unless-stopped
+
+volumes:
+  primary_mysql_data:
+  replica_mysql_data:
+
+#  mysqld_exporter:
+#    image: prom/mysqld-exporter:latest
+#    container_name: mysqld_exporter
+#    command:
+#      - "--mysqld.username=exporter:Abcd1234"
+#      - "--mysqld.address=mysql:3306"
+#    ports:
+#      - "9104:9104"
+#    depends_on:
+#      - primary
+
+#volumes:
+#  mysql_data:
+#    name: ${DOCKER_VOLUME}

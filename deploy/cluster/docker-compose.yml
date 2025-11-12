@@ -11,6 +11,7 @@ services:
         - ./initdb.d/setup.sql:/docker-entrypoint-initdb.d/setup.sql
         - ./conf/my.cnf.a:/etc/mysql/my.cnf
         - ./data-mysql-a:/var/lib/mysql
+        - ../sql/:/sql/
       networks:
         - mysql-cluster
       healthcheck:
@@ -36,6 +37,7 @@ services:
         - ./initdb.d/setup.sql:/docker-entrypoint-initdb.d/setup.sql
         - ./conf/my.cnf.b:/etc/mysql/my.cnf
         - ./data-mysql-b:/var/lib/mysql
+        - ../sql/:/sql/
       networks:
         - mysql-cluster
       healthcheck:
@@ -61,6 +63,7 @@ services:
         - ./initdb.d/setup.sql:/docker-entrypoint-initdb.d/setup.sql
         - ./conf/my.cnf.c:/etc/mysql/my.cnf
         - ./data-mysql-c:/var/lib/mysql
+        - ../sql/:/sql/
       networks:
         - mysql-cluster
       healthcheck:

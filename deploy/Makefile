@@ -1,8 +1,8 @@
+#include ../Makefile
+include ./Makefile.env
+
 # Default target: help
 .DEFAULT_GOAL := help
-
-include Makefile.env
-
 # Default variables (can be overridden)
 ct ?= mysql-a
 
@@ -16,7 +16,6 @@ CYAN := \033[36m
 WHITE := \033[37m
 RESET := \033[0m
 
-VARS_TO_PRINT = ct CLUSTER_USER CLUSTER_USER_PASSWORD MYSQL_ROUTER_IMAGE MYSQL_HOST MYSQL_PORT MYSQL_USER MYSQL_PASSWORD MYSQL_INNODB_CLUSTER_MEMBERS
 
 #print_vars:
 #   @echo "Makefile variables:"
@@ -24,12 +23,11 @@ VARS_TO_PRINT = ct CLUSTER_USER CLUSTER_USER_PASSWORD MYSQL_ROUTER_IMAGE MYSQL_H
 #       echo "  $$var = $${!var}"; \
 #   done
 
-.PHONY: help up down stop mysql mysqlsh shell ps logs volume.rm.all volume.ls router0.run router1.run router.shell print_vars
 
 help:
 	@echo "$(GREEN)Available targets:$(RESET)"
-	@echo "  up                - Start cluster (optionally ct=<container>)"
-	@echo "  down              - Stop cluster"
+	@echo "  up.all            - Start cluster (optionally ct=<container>)"
+	@echo "  down.all          - Stop cluster"
 	@echo "  stop              - Stop containers"
 	@echo "  shell             - Shell into container (ct=<container>)"
 	@echo "  mysql             - MySQL client (ct=<container>)"
@@ -38,9 +36,9 @@ help:
 	@echo "  logs              - Show logs (ct=<container>)"
 	@echo "  volume.rm.all     - Remove dangling volumes"
 	@echo "  volume.ls         - List volumes"
-	@echo "  router0.run       - Run MySQL Router 0"
-	@echo "  router1.run       - Run MySQL Router 1"
-	@echo "  router.shell      - Shell into router container"
+	@echo "  env               - Show environment configuration"
+	@echo "  mysql.create.login  - Create MySQL login for cluster user"
+	@echo "  mysql.create.schema - Create demo schemas in MySQL"
 
 .PHONY: up.all
 up.all: ## Start services (usage: make up db=mysql)
@@ -54,71 +52,58 @@ down.all: ## Stop and remove all services
 	docker compose down
 	@echo "$(GREEN)✓ All services stopped successfully$(RESET)"
 
+.PHONY: stop
 stop:
 	@docker compose stop $(ct)
 
-mysqlsh.admin: print_vars
-	@docker compose exec $(ct) mysqlsh $(ADMIN_SECERT) -hlocalhost --sql
-
-mysqlsh.cluster: print_vars
-	@docker compose exec $(ct) mysqlsh $(CLUSTER_SECERT) -hlocalhost --js
-
-shell: print_vars
+.PHONY: shell
+shell: ## Open shell in container (usage: make shell ct=<container>)
 	@echo "$(GREEN)Opening shell in container '$(ct)'...$(RESET)"
 	@docker compose exec $(ct) bash
 
+.PHONY: ps
 ps:
 	@echo "$(GREEN)All Services Status:$(RESET)"
 	docker compose ps -a
 
-logs: print_vars
-	@docker compose logs -f $(ct)
+.PHONY: logs
+logs:
+	@docker logs -f $(ct)
 
-volume.rm.all:
-	@echo "$(GREEN)Removing dangling Docker volumes...$(RESET)"
-	@docker volume rm $$(docker volume ls -qf dangling=true)
-
+.PHONY: volume.ls
 volume.ls:
 	@echo "$(GREEN)Docker Volumes:$(RESET)"
 	@docker volume ls
 
-ROUTER_PORTS = -p 6446:6446 -p 6447:6447 -p 6448:6448 -p 6449:6449 -p 6450:6450
-ROUTER1_PORTS = -p 16446:6446 -p 16447:6447 -p 16448:6448 -p 16449:6449 -p 16450:6450
+.PHONY: volume.rm
+volume.rm: ## Remove Docker volumes
+	@echo "$(GREEN)Removing Docker volumes...$(RESET)"
+	@docker volume rm $(DOCKER_VOLUME)
 
-router0.run:
-	@docker run -d \
-		--name router-0 \
-		-e MYSQL_HOST=$(MYSQL_HOST) \
-		-e MYSQL_PORT=$(MYSQL_PORT) \
-		-e MYSQL_USER=$(MYSQL_USER) \
-		-e MYSQL_PASSWORD=$(MYSQL_PASSWORD) \
-		-e MYSQL_INNODB_CLUSTER_MEMBERS=$(MYSQL_INNODB_CLUSTER_MEMBERS) \
-		--network cluster_mysql-cluster \
-		$(ROUTER_PORTS) \
-		-ti $(MYSQL_ROUTER_IMAGE)
+.PHONY: mysqlsh
+mysqlsh: ## Open MySQL Shell in container (usage: make mysqlsh ct=<container>)
+	@echo "$(GREEN)Opening MySQL Shell in container '$(ct)'...$(RESET)"
+	@docker compose exec $(ct) mysqlsh -uroot -p$(MYSQL_ROOT_PASSWORD) --sql
 
-router1.run:
-	@docker run -d \
-		--name router-1 \
-		-e MYSQL_HOST=$(MYSQL_HOST) \
-		-e MYSQL_PORT=$(MYSQL_PORT) \
-		-e MYSQL_USER=$(MYSQL_USER) \
-		-e MYSQL_PASSWORD=$(MYSQL_PASSWORD) \
-		-e MYSQL_INNODB_CLUSTER_MEMBERS=$(MYSQL_INNODB_CLUSTER_MEMBERS) \
-		--network cluster_mysql-cluster \
-		$(ROUTER1_PORTS) \
-		-ti $(MYSQL_ROUTER_IMAGE)
+.PHONY: mysql.create.login
+mysql.create.login: ## Create MySQL login for cluster user
+	@echo "$(GREEN)Creating MySQL user login...$(RESET)"
+	docker exec -i $(ct) mysql -uroot -p$(MYSQL_ROOT_PASSWORD) < $(SQL_PATH)/acl.sql
 
-router.shell:
-	@docker run \
-		-e MYSQL_HOST=$(MYSQL_HOST) \
-		-e MYSQL_PORT=$(MYSQL_PORT) \
-		-e MYSQL_USER=$(MYSQL_USER) \
-		-e MYSQL_PASSWORD=$(MYSQL_PASSWORD) \
-		-e MYSQL_INNODB_CLUSTER_MEMBERS=$(MYSQL_INNODB_CLUSTER_MEMBERS) \
-		--network cluster_default \
-		$(ROUTER_PORTS) \
-		-ti $(MYSQL_ROUTER_IMAGE) /bin/bash
+.PHONY: mysql.create.schema
+mysql.create.schema:
+	@echo "$(GREEN)Creating MySQL schemas...$(RESET)"
+	# Run the SQL file from the host into the mysql container. Use relative path so
+	# the Makefile can be run from the repository root.
+	@echo "Applying company schema (using utf8mb4 client)..."
+	docker exec -i $(ct) mysql --default-character-set=utf8mb4 -uroot -p$(MYSQL_ROOT_PASSWORD) < $(SQL_PATH)/create_company_schema.sql || true
+	@echo "Applying demonslayer schema (using utf8mb4 client)..."
+	docker exec -i $(ct) mysql --default-character-set=utf8mb4 -uroot -p$(MYSQL_ROOT_PASSWORD) < $(SQL_PATH)/create_demonslayer_schema.sql || true
+	@echo "Schemas applied."
+	@echo "Applying inventory schema (using utf8mb4 client)..."
+	docker exec -i $(ct) mysql --default-character-set=utf8mb4 -uroot -p$(MYSQL_ROOT_PASSWORD) < $(SQL_PATH)/create_inventory_schema.sql || true
+	@echo "Schemas applied."
+
 
 # ===================================
 # Environment Targets
@@ -131,4 +116,9 @@ env: ## Show environment configuration
 	@echo "MYSQL_PORT: $(MYSQL_PORT)"
 	@echo "MYSQL_USER: $(MYSQL_USER)"
 	@echo "MYSQL_PASSWORD: $(MYSQL_PASSWORD)"
-	@echo "MYSQL_INNODB_CLUSTER_MEMBERS: $(MYSQL_INNODB_CLUSTER_MEMBERS)"
+	@echo "DOCKER_IMAGE: $(DOCKER_IMAGE)"
+	@echo "TZ: $(TZ)"
+	@echo "SQL_PATH: $(SQL_PATH)"
+	@echo "ct: $(ct)"
+
+#	@echo "DOCKER_VOLUME: $(DOCKER_VOLUME)"
